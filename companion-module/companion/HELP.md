@@ -7,7 +7,7 @@ Controls PowerPoint (Mac and Windows) and Keynote (Mac) on presentation machines
 1. Install the GRP Click Receiver on each presentation machine. Windows shows its IP address at the end of the install; on a Mac it's in System Settings → Network.
 2. Put each machine's IP address into this connection (Machines 1–10). Leave the port at 8765.
 
-The receiver never opens PowerPoint or Keynote itself: open the presentation first. If both are open on a Mac, it controls PowerPoint.
+The receiver never opens PowerPoint or Keynote itself: open the presentation first. If both are open on a Mac, it controls the one with a slideshow running (or, failing that, a presentation open, or in front).
 
 **Actions** (each has a **Machine** option): next, previous, first, last, go to slide number, start show, end show.
 Go to slide works in Keynote and PowerPoint for Windows. PowerPoint for Mac can't do it.

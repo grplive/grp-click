@@ -49,3 +49,25 @@ test('AppleScript errors are made readable', () => {
   assert.strictEqual(cleanAppleScriptError('10:20: execution error: Keynote got an error: There is no slide 9 (9003)'), 'There is no slide 9')
   assert.match(cleanAppleScriptError('execution error: Not authorised to send Apple events to Keynote. (-1743)'), /Privacy & Security > Automation/)
 })
+
+test('Mac auto picks the right app', () => {
+  const { chooseMacApp, parseMacState } = require('../drivers')
+  const st = (s) => chooseMacApp(parseMacState(s))
+  assert.strictEqual(st(''), null)
+  // The 2026-11-15 case: PowerPoint running with nothing open, Keynote in front with a deck.
+  assert.strictEqual(st('powerpoint,false,false,false;keynote,false,true,true;'), 'keynote')
+  assert.strictEqual(st('powerpoint,false,true,false;keynote,true,true,false;'), 'keynote') // Keynote playing
+  assert.strictEqual(st('powerpoint,true,true,false;keynote,true,true,true;'), 'powerpoint') // both playing
+  assert.strictEqual(st('powerpoint,false,true,true;keynote,false,true,false;'), 'powerpoint') // both open: front one
+  assert.strictEqual(st('powerpoint,false,true,false;keynote,false,true,true;'), 'keynote')
+  assert.strictEqual(st('powerpoint,false,false,false;keynote,false,false,false;'), 'powerpoint')
+  assert.strictEqual(st('keynote,false,false,false;'), 'keynote')
+})
+
+test('Mac app-choice script compiles', { skip: !haveApps && 'needs a Mac with PowerPoint and Keynote' }, () => {
+  const { MAC_STATE_SCRIPT } = require('../drivers')
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'grp-click-'))
+  fs.writeFileSync(path.join(dir, 's.applescript'), MAC_STATE_SCRIPT.join('\n'))
+  execFileSync('osacompile', ['-o', path.join(dir, 'out.scpt'), path.join(dir, 's.applescript')], { stdio: 'pipe' })
+  fs.rmSync(dir, { recursive: true, force: true })
+})

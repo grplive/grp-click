@@ -59,7 +59,7 @@ Mac IP address: System Settings → Network → your connection → Details. Win
 | Start, end show | yes | yes | yes |
 
 - Open the presentation first. GRP Click never opens an app.
-- On a Mac with both open, it controls PowerPoint. Quit the one you're not using.
+- On a Mac with both open, it controls the one with a slideshow running; otherwise the one with a presentation open; otherwise the one in front.
 - Keynote only takes Next/Back while it's the front app, so a press brings the show to the front if something else was clicked.
 - Keynote slide numbers are Keynote's own: skipped slides have no number.
 

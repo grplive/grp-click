@@ -125,22 +125,49 @@ const macDriver = (name, scripts) => ({
 const macPowerPoint = macDriver('PowerPoint (Mac)', macPowerPointScripts)
 const macKeynote = macDriver('Keynote (Mac)', macKeynoteScripts)
 
-function isRunning(processName) {
-  return run('pgrep', ['-x', processName]).then(
-    () => true,
-    () => false
-  )
+// What's open right now, in one call: "powerpoint,<show running>,<deck open>,<frontmost>;keynote,...;"
+// Only asks apps that are already running, so it never launches either.
+const MAC_STATE_SCRIPT = [
+  'set r to ""',
+  `if application "${PPT}" is running then`,
+  `  tell application "${PPT}" to set r to r & "powerpoint," & ((count of slide show windows) > 0) & "," & ((count of presentations) > 0) & "," & frontmost & ";"`,
+  'end if',
+  'if application "Keynote" is running then',
+  '  tell application "Keynote" to set r to r & "keynote," & playing & "," & ((count of documents) > 0) & "," & frontmost & ";"',
+  'end if',
+  'return r',
+]
+
+function parseMacState(text) {
+  return text
+    .split(';')
+    .filter(Boolean)
+    .map((part) => {
+      const [app, playing, open, front] = part.split(',')
+      return { app, playing: playing === 'true', open: open === 'true', front: front === 'true' }
+    })
 }
 
-// Mac "auto": use Keynote only when it is open and PowerPoint is not. Otherwise PowerPoint.
-// Decided per command, so you can switch apps freely.
+// Mac "auto": which app to control, decided per command so you can switch freely.
+//   1. the one with a slideshow running (PowerPoint if both)
+//   2. else the one with a presentation open (the one in front if both)
+//   3. else the one in front, else PowerPoint
+function chooseMacApp(apps) {
+  if (!apps.length) return null
+  const pick = (list) => (list.find((a) => a.front) || list.find((a) => a.app === 'powerpoint') || list[0]).app
+  const playing = apps.filter((a) => a.playing)
+  if (playing.length) return (playing.find((a) => a.app === 'powerpoint') || playing[0]).app
+  const open = apps.filter((a) => a.open)
+  if (open.length) return pick(open)
+  return pick(apps)
+}
+
 const macAuto = {
   name: 'Auto (Mac: Keynote or PowerPoint)',
   async exec(cmd, args) {
-    const [keynoteUp, pptUp] = await Promise.all([isRunning('Keynote'), isRunning(PPT)])
-    if (!keynoteUp && !pptUp) throw new Error("Neither PowerPoint nor Keynote is open")
-    const target = keynoteUp && !pptUp ? macKeynote : macPowerPoint
-    return target.exec(cmd, args)
+    const app = chooseMacApp(parseMacState(await osascript(MAC_STATE_SCRIPT)))
+    if (!app) throw new Error('Neither PowerPoint nor Keynote is open')
+    return (app === 'keynote' ? macKeynote : macPowerPoint).exec(cmd, args)
   },
 }
 
@@ -206,4 +233,4 @@ function createDriver(app) {
   throw new Error(`app "${app}" is not available on ${platform} (Keynote is Mac only)`)
 }
 
-module.exports = { createDriver, cleanAppleScriptError, macPowerPointScripts, macKeynoteScripts, winPowerPointScripts }
+module.exports = { createDriver, cleanAppleScriptError, chooseMacApp, parseMacState, MAC_STATE_SCRIPT, macPowerPointScripts, macKeynoteScripts, winPowerPointScripts }

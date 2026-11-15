@@ -56,8 +56,8 @@ ON THE NIGHT
 - Start show / End show / Next / Back / First / Last work in both.
 - Go to slide works in Keynote and PowerPoint for Windows,
   not PowerPoint for Mac.
-- Mac with both PowerPoint and Keynote open: it controls PowerPoint.
-  Quit the one you're not using.
+- Mac with both PowerPoint and Keynote open: it controls the one
+  with a slideshow running, else the one with a deck open.
 - Keynote: pressing Next brings the show to the front if something
   else was clicked on the presentation Mac.
 - Buttons go RED when the machine can't be reached, AMBER when the
