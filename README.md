@@ -1,76 +1,94 @@
 # GRP Click
 
-Control PowerPoint and Keynote on other computers from Bitfocus Companion: next slide, previous slide, first, last, go to a slide number, start and end the show.
+Change slides in **PowerPoint** (Mac and Windows) and **Keynote** (Mac) from Bitfocus Companion and a Stream Deck, from [GRP Live](https://grp.live).
 
-This folder has the source. The ready-to-install files are in [release/](release/).
+- Next, back, first, last, go to slide, start and end the show
+- Up to 10 presentation machines from one Companion connection
+- Buttons turn red when a machine can't be reached and amber when a press didn't work
+- Never opens PowerPoint or Keynote and never sends key presses: it only talks to the show that's open
 
-| File | Install on | What it is |
-|---|---|---|
-| `GRP-Click-Receiver-Mac-AppleSilicon.pkg` | Mac with Apple silicon (M1 or later) | Receiver installer |
-| `GRP-Click-Receiver-Mac-Intel.pkg` | Intel Mac | Receiver installer |
-| `GRP-Click-Receiver-Windows.zip` | Windows PC | Receiver installer (unzip, then double-click `install.bat`) |
-| `grp-click-1.0.0.tgz` | The Companion computer | GRP Click Companion module |
+Goes with [GRP Stage Timer](https://github.com/grplive/grp-stage-timer) and [GRP Notes](https://github.com/grplive/grp-notes).
 
-## 1. Install a receiver on each presentation computer
+## Download
 
-Each presentation computer runs one receiver. It needs no other software.
+**Receiver**, for each presentation machine:
 
-**Mac**
-1. Double-click the `.pkg` for your Mac. Pick Apple silicon or Intel (Apple menu → About This Mac shows the chip).
-2. Follow the installer. It starts the receiver when you log in. Because this build is not notarized, you may need to right-click the `.pkg` and choose **Open** the first time.
-3. The first time you send a command, macOS asks whether the receiver may control PowerPoint or Keynote. Click **OK**. Changed your mind later? System Settings → Privacy & Security → Automation.
+| | |
+|---|---|
+| **Mac – Apple Silicon** (M1 and later) | [GRP-Click-Receiver-Mac-Apple-Silicon.pkg](https://github.com/grplive/grp-click/releases/latest/download/GRP-Click-Receiver-Mac-Apple-Silicon.pkg) |
+| **Mac – Intel** | [GRP-Click-Receiver-Mac-Intel.pkg](https://github.com/grplive/grp-click/releases/latest/download/GRP-Click-Receiver-Mac-Intel.pkg) |
+| **Windows** (64-bit) · *not tested yet, see below* | [GRP-Click-Receiver-Windows.zip](https://github.com/grplive/grp-click/releases/latest/download/GRP-Click-Receiver-Windows.zip) |
 
-**Windows**
-1. Unzip the file and double-click `install.bat`. Approve the administrator prompt.
-2. At the end the window shows this computer's **IP address**. Write it down.
-3. Windows may say "unknown publisher" because the build is not code-signed. Click **More info** → **Run anyway**.
+**Companion module**, for the Companion machine: [GRP-Click-Companion-Module.tgz](https://github.com/grplive/grp-click/releases/latest/download/GRP-Click-Companion-Module.tgz)
 
-Run the installer while logged in to the same account that runs PowerPoint. The receiver controls the apps in your own desktop session.
+Not sure which Mac? Apple menu → About This Mac: "Chip: Apple M…" is Apple Silicon, "Processor: Intel" is Intel.
 
-## 2. Note each machine's IP address
+Older versions and release notes: [Releases](https://github.com/grplive/grp-click/releases).
 
-Use the IP address of each presentation computer on your network (not 127.0.0.1).
+### Installing the receiver
 
-- **Mac:** System Settings → Network → your connection → Details → TCP/IP shows the IP address.
-- **Windows:** the IP is printed at the end of `install.bat`, or run `ipconfig` in a Command Prompt.
+The receiver has no window. It starts by itself when you log in. Install it while logged in as the person who runs PowerPoint or Keynote.
 
-## 3. Set up the Companion module
+The installers aren't signed with Apple or Microsoft yet, so the first install needs one extra step:
 
-1. Import `grp-click-1.0.0.tgz` into Companion as a connection module. The exact menu depends on your Companion version: look for module import or install from file under Settings or the Connections page.
-2. Add a **GRP Click** connection.
-3. Fill in the **Port**. Use 8765 unless you changed it on the receiver.
-4. For each machine, fill in **Machine N IP**. Machines 1 to 10 are available. Leave unused slots blank.
-5. Each action has a **Machine** dropdown (1 to 10). Pick the machine to control. The preset buttons target Machine 1 by default.
+- **Mac:** double-click the .pkg. When macOS says it can't check it, click **Done**. Go to **System Settings → Privacy & Security**, scroll down and click **Open Anyway**, then follow the installer. The first time Companion sends a command, macOS asks whether *grp-click-receiver* may control PowerPoint or Keynote: click **OK**. Do one test press before the show. After an update macOS may ask again.
+- **Windows:** unzip, then double-click **install.bat** and approve the administrator prompt. If "Windows protected your PC" appears, click **More info → Run anyway**. The window shows the machine's IP address at the end.
 
-The instance status shows how many machines are connected. Each machine reconnects automatically if its receiver restarts.
+Updating: install the new version over the top.
 
-## Receiver commands
+### Windows: not tested yet
 
-| Command | PowerPoint (Mac and Windows) | Keynote (Mac) |
-|---|---|---|
-| Next, previous | yes | yes |
-| First, last | yes | yes |
-| Go to slide N | yes | not supported |
-| Start, end show | yes | yes |
+The Windows receiver (PowerPoint for Windows) hasn't been tried on a Windows machine yet. Use a Mac for shows until it has; problems are welcome via grp.live.
 
-**Keynote:** the receiver uses Keynote when Keynote is running and PowerPoint is not. If both are running, it uses PowerPoint.
+## Bitfocus Companion
+
+1. Companion → Modules → **Import module package** → the .tgz (until it's in Companion's own module list).
+2. Add a **GRP Live: Click** connection.
+3. Enter each presentation machine's IP address (Machine 1–10). Leave the port at 8765.
+4. Drag the presets onto your buttons. They target Machine 1 or 2; change the **Machine** option for others.
+
+Mac IP address: System Settings → Network → your connection → Details. Windows: shown at the end of install.bat, or run `ipconfig`.
+
+## What works where
+
+| | PowerPoint (Mac) | PowerPoint (Windows) | Keynote (Mac) |
+|---|---|---|---|
+| Next, back | yes | yes | yes |
+| First, last | yes | yes | yes |
+| Go to slide | no (PowerPoint for Mac can't) | yes | yes |
+| Start, end show | yes | yes | yes |
+
+- Open the presentation first. GRP Click never opens an app.
+- On a Mac with both open, it controls PowerPoint. Quit the one you're not using.
+- Keynote only takes Next/Back while it's the front app, so a press brings the show to the front if something else was clicked.
+- Keynote slide numbers are Keynote's own: skipped slides have no number.
 
 ## Security
 
-- There is no password or token. Anyone on the same network who can reach port 8765 can control the slides.
-- Use GRP Click only on a private network you trust. Do not expose the port to the internet or to guest Wi-Fi.
-- Commands are not encrypted.
+No password and no encryption: anyone on the same network who can reach port 8765 can change the slides. Use it on a private show network, never on guest or venue Wi-Fi. The Windows installer opens port 8765 for the receiver only.
 
-## Source layout
+## Network API
 
-- `receiver/` - receiver source. `receiver.js` is the server, `drivers.js` controls PowerPoint and Keynote, `send-test.js` sends a test command. `build/build.js` builds the installers.
-- `companion-module/` - Companion module source in `src/main.js`, manifest in `companion/manifest.json`.
+The receiver listens on TCP port **8765**. Send one JSON object per line; each gets a one-line reply.
 
-To rebuild: run `npm install` and `npm run build` in `receiver/` (the Mac installers need a Mac), and `npm install` then `npx companion-module-build` in `companion-module/`.
+```
+{"cmd":"next"}            {"ok":true,"cmd":"next"}
+{"cmd":"goto","slide":4}  {"ok":false,"cmd":"goto","error":"There is no slide 4"}
+{"cmd":"ping"}            {"ok":true,"cmd":"ping","app":"…","platform":"darwin","version":"1.1.0"}
+```
 
-## Known limits
+Commands: `ping`, `next`, `prev`, `first`, `last`, `goto` (with `slide`), `start`, `stop`.
 
-- **Not yet run on real PowerPoint or Keynote.** The command routing and installer packaging were tested here, but the AppleScript and PowerShell calls that actually move slides still need a test run on each app. If a command fails, the receiver prints the reason in its log.
-- **Not code-signed or notarized.** macOS and Windows will warn on first install. Signing needs an Apple Developer ID and a Windows code-signing certificate.
-- **Companion module not loaded in Companion yet.** It builds and passes a routing test against a live receiver, but has not been loaded in a running Companion instance.
-- **Repository and bugs links** in the manifest are placeholders (`https://grp.live`).
+Settings are in `config.json` next to the log (`~/Library/Application Support/GRP Click/` on Mac, `%APPDATA%\GRP Click\` on Windows): `port`, `bind`, and `app` (`auto`, `powerpoint` or `keynote`). Restart the receiver (log out and in) after changing them.
+
+## Source
+
+- `receiver/`: `receiver.js` (start-up, config, log), `server.js` (network), `drivers.js` (PowerPoint and Keynote), `send-test.js` (send one command by hand), `build/` (installers). `npm test` runs the tests; on a Mac with PowerPoint and Keynote it also checks every AppleScript compiles.
+- `companion-module/`: the Companion module (`src/main.js`), built with `npm run package`.
+- `scripts/release.sh --build` tests and builds everything into `release/GRP Click/` for the NAS. `scripts/publish-github.sh` publishes the GitHub release (commit and push first, and write `scripts/release-notes/<version>.md`).
+
+## Help
+
+Questions or problems: [grp.live](https://grp.live).
+
+© GRP Live. Free to download and use. MIT licence.

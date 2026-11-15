@@ -1,25 +1,19 @@
-# GRP Click
+## GRP Click
 
 ![GRP Click](grp-click-logo.png)
 
-GRP Click sends slideshow commands to the GRP Click Receiver running on a PowerPoint (Mac or Windows) or Keynote (Mac only) computer.
+Controls PowerPoint (Mac and Windows) and Keynote (Mac) on presentation machines, through the **GRP Click Receiver** installed on each one.
 
-## Setup
+1. Install the GRP Click Receiver on each presentation machine. Windows shows its IP address at the end of the install; on a Mac it's in System Settings → Network.
+2. Put each machine's IP address into this connection (Machines 1–10). Leave the port at 8765.
 
-1. Install the GRP Click Receiver on each presentation computer.
-2. Note each computer's IP address.
-3. In this connection's settings, enter the **Port** (default 8765) and each machine's **IP address**. Machines 1 to 10 are available. Leave unused slots blank.
+The receiver never opens PowerPoint or Keynote itself: open the presentation first. If both are open on a Mac, it controls PowerPoint.
 
-## Actions
+**Actions** (each has a **Machine** option): next, previous, first, last, go to slide number, start show, end show.
+Go to slide works in Keynote and PowerPoint for Windows. PowerPoint for Mac can't do it.
 
-Every action has a **Machine** option (1 to 10) that chooses the computer to control.
+**Presets** for Machines 1 and 2 (change the Machine option on a button for others). Buttons turn **red** when the machine can't be reached and **amber** when the last command didn't work (for example, no slideshow running). The status button shows Connected / Not connected.
 
-- Next slide, previous slide, first slide, last slide
-- Start slideshow, end slideshow
-- Go to slide number (PowerPoint only)
-- Ping receiver
+**Variables:** `mN_status`, `mN_platform` (Mac or Windows), `mN_version` (receiver), `mN_error` (last error), where N is the machine number.
 
-## Notes
-
-- There is no password. Use GRP Click only on a private network you trust.
-- Keynote control works for next, previous, first, last, start and end. Go to slide number is not supported for Keynote.
+No password: use it only on a private show network.

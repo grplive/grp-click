@@ -1,0 +1,23 @@
+GRP CLICK - COMPANION MODULE  {{MODVER}}
+=======================================
+
+This goes on the machine running Bitfocus Companion (version 4 or newer).
+
+1. Copy grplive-click-{{MODVER}}.tgz to the Companion machine.
+2. Open the Companion web page > Modules > "Import module package"
+   and choose the .tgz file.
+3. Connections > add "GRP Live: Click".
+4. Type in each presentation machine's IP address (Machine 1, 2...).
+   Leave the port at 8765.
+5. Presets: drag the Machine 1 / Machine 2 buttons onto your
+   Stream Deck pages. For Machine 3 and up, drag a Machine 1 button
+   and change its Machine option.
+
+  NEXT / BACK / FIRST / LAST / START SHOW / END SHOW / GO TO
+                RED   = can't reach that machine
+                AMBER = the last press didn't work (no slideshow,
+                        no such slide...). Clears on the next good press.
+  Status        Connected / Not connected (display only)
+
+The presentation machines and the Companion machine must be on the
+same network.

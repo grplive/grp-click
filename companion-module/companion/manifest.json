@@ -1,28 +1,28 @@
 {
 	"$schema": "../node_modules/@companion-module/base/assets/manifest.schema.json",
-	"type": "connection",
-	"id": "grp-click",
+	"id": "grplive-click",
 	"name": "GRP Click",
-	"shortname": "grpclick",
-	"description": "Sends next, previous and slideshow commands over the network to the GRP Click Receiver running on a PowerPoint or Keynote computer",
-	"version": "1.0.2",
+	"shortname": "GRP Click",
+	"description": "Next, previous, go to slide, start and end the show in PowerPoint (Mac/Windows) and Keynote, through the GRP Click Receiver",
+	"version": "0.0.0",
 	"license": "MIT",
-	"repository": "https://grp.live",
-	"bugs": "https://grp.live",
+	"repository": "git+https://github.com/bitfocus/companion-module-grplive-click.git",
+	"bugs": "https://github.com/bitfocus/companion-module-grplive-click/issues",
 	"maintainers": [
 		{
-			"name": "GRP",
-			"email": "maintainers@example.com"
+			"name": "GRP Live",
+			"github": "SamBashir-GRPLIVE",
+			"url": "https://grp.live"
 		}
 	],
+	"legacyIds": [],
 	"runtime": {
 		"type": "node22",
 		"api": "nodejs-ipc",
 		"apiVersion": "0.0.0",
 		"entrypoint": "../src/main.js"
 	},
-	"legacyIds": [],
-	"manufacturer": "GRP",
-	"products": ["GRP Click"],
-	"keywords": ["slides", "powerpoint", "keynote", "presentation"]
+	"manufacturer": "GRP Live",
+	"products": ["Click"],
+	"keywords": ["slides", "powerpoint", "keynote", "presentation", "clicker"]
 }

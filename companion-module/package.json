@@ -1,25 +1,25 @@
 {
-	"name": "grp-click",
-	"version": "1.0.2",
-	"description": "GRP Click: Bitfocus Companion connection for the GRP Click Receiver",
-	"type": "module",
+	"name": "grplive-click",
+	"version": "1.1.0",
+	"description": "Control PowerPoint and Keynote on presentation machines from Bitfocus Companion, through the GRP Click Receiver",
 	"main": "src/main.js",
-	"scripts": {
-		"format": "prettier -w .",
-		"package": "companion-module-build"
-	},
 	"license": "MIT",
-	"repository": {
-		"type": "git",
-		"url": "https://grp.live"
+	"scripts": {
+		"package": "companion-module-build",
+		"format": "prettier -w ."
 	},
 	"engines": {
-		"node": ">=22"
+		"node": "^22.8"
 	},
 	"dependencies": {
-		"@companion-module/base": "^2.2.1"
+		"@companion-module/base": "~1.15.1"
 	},
 	"devDependencies": {
-		"@companion-module/tools": "^3.1.1"
-	}
+		"@companion-module/tools": "^2.9.1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/bitfocus/companion-module-grplive-click.git"
+	},
+	"prettier": "@companion-module/tools/.prettierrc.json"
 }

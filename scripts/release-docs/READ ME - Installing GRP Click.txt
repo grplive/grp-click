@@ -1,0 +1,76 @@
+GRP CLICK  -  receiver version {{VER}}  ({{DATE}})
+==============================================================
+
+GRP Click lets Bitfocus Companion (Stream Deck) change slides in
+PowerPoint or Keynote on the presentation machines.
+
+  RECEIVER  - goes on each presentation machine. No window, starts
+              by itself at login.
+  MODULE    - goes on the Companion machine (see "Companion module").
+
+
+Which file do I need?
+---------------------
+  Mac: Apple menu > About This Mac.
+    "Chip: Apple M1/M2/M3/M4..."  ->  Mac - Apple Silicon
+    "Processor: Intel..."         ->  Mac - Intel
+  Windows laptop                   ->  Windows
+
+Copy the file to the machine first (don't run it from the NAS).
+Log in as the person who will run PowerPoint/Keynote before installing.
+
+
+MAC
+---
+1. Double-click the .pkg. The first time, macOS will say it can't
+   check it. Click Done (not Move to Bin).
+2. Open System Settings > Privacy & Security, scroll down, and click
+   "Open Anyway" next to the GRP Click installer. Enter the password.
+3. Follow the installer. The receiver is now running.
+4. The first time Companion sends a command, macOS asks whether
+   "grp-click-receiver" may control PowerPoint / Keynote - click OK.
+   Do this once before the show: open the deck, press Next in Companion.
+   (After an update macOS may ask once more.)
+5. IP address: System Settings > Network > (cable or Wi-Fi) > Details.
+
+Log: ~/Library/Application Support/GRP Click/receiver.log
+
+
+WINDOWS  (NOT TESTED YET - use a Mac for shows until it has been)
+-------
+1. Right-click the .zip > Extract All. Open the folder.
+2. Double-click install.bat and say Yes to the administrator prompt.
+   If a blue "Windows protected your PC" box appears:
+   click "More info", then "Run anyway".
+3. At the end it shows the machine's IP address. Write it down.
+
+Log: %APPDATA%\GRP Click\receiver.log
+To remove it: uninstall.bat in the same folder.
+
+Updating (Mac or Windows): install the new one over the top.
+
+
+ON THE NIGHT
+------------
+- Open the deck first. GRP Click never opens PowerPoint or Keynote.
+- Start show / End show / Next / Back / First / Last work in both.
+- Go to slide works in Keynote and PowerPoint for Windows,
+  not PowerPoint for Mac.
+- Mac with both PowerPoint and Keynote open: it controls PowerPoint.
+  Quit the one you're not using.
+- Keynote: pressing Next brings the show to the front if something
+  else was clicked on the presentation Mac.
+- Buttons go RED when the machine can't be reached, AMBER when the
+  last press didn't work (e.g. no slideshow running).
+
+No password: use it on the show network only, never guest Wi-Fi.
+
+
+WHAT'S IN THIS FOLDER
+---------------------
+  Mac - Apple Silicon / Mac - Intel / Windows   receiver installers
+  Companion module                              for the Companion machine, see the note inside
+  Previous versions                             only if the new one has a problem
+
+
+Problems or questions: Sam.
