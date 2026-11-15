@@ -125,15 +125,44 @@ const macDriver = (name, scripts) => ({
 const macPowerPoint = macDriver('PowerPoint (Mac)', macPowerPointScripts)
 const macKeynote = macDriver('Keynote (Mac)', macKeynoteScripts)
 
-// What's open right now, in one call: "powerpoint,<show running>,<deck open>,<frontmost>;keynote,...;"
+// What's open right now, in one call. One entry per running app:
+//   "<app>,<show running>,<deck open>,<frontmost>,<slide>,<total>;"
+// slide/total are 0 when no show runs; slide is "missing value" on PowerPoint's end-of-show screen.
+// Numbering follows each app (as GRP Notes does): PowerPoint counts every slide, hidden ones too;
+// Keynote uses its own slide numbers, which skip skipped slides.
 // Only asks apps that are already running, so it never launches either.
 const MAC_STATE_SCRIPT = [
   'set r to ""',
   `if application "${PPT}" is running then`,
-  `  tell application "${PPT}" to set r to r & "powerpoint," & ((count of slide show windows) > 0) & "," & ((count of presentations) > 0) & "," & frontmost & ";"`,
+  `  tell application "${PPT}"`,
+  '    set showing to (count of slide show windows) > 0',
+  '    set cur to 0',
+  '    set tot to 0',
+  '    if showing then',
+  '      try',
+  '        set cur to slide index of slide of slideshow view of slide show window 1',
+  '      end try',
+  '      try',
+  '        set tot to count of slides of presentation of slide show window 1',
+  '      end try',
+  '    end if',
+  '    set r to r & "powerpoint," & showing & "," & ((count of presentations) > 0) & "," & frontmost & "," & cur & "," & tot & ";"',
+  '  end tell',
   'end if',
   'if application "Keynote" is running then',
-  '  tell application "Keynote" to set r to r & "keynote," & playing & "," & ((count of documents) > 0) & "," & frontmost & ";"',
+  '  tell application "Keynote"',
+  '    set showing to playing',
+  '    set cur to 0',
+  '    set tot to 0',
+  '    if showing then',
+  '      try',
+  '        set d to front document',
+  '        set cur to slide number of current slide of d',
+  '        set tot to count of (slides of d whose skipped is false)',
+  '      end try',
+  '    end if',
+  '    set r to r & "keynote," & showing & "," & ((count of documents) > 0) & "," & frontmost & "," & cur & "," & tot & ";"',
+  '  end tell',
   'end if',
   'return r',
 ]
@@ -143,8 +172,17 @@ function parseMacState(text) {
     .split(';')
     .filter(Boolean)
     .map((part) => {
-      const [app, playing, open, front] = part.split(',')
-      return { app, playing: playing === 'true', open: open === 'true', front: front === 'true' }
+      const [app, playing, open, front, slide, total] = part.split(',')
+      const n = Number(slide)
+      return {
+        app,
+        playing: playing === 'true',
+        open: open === 'true',
+        front: front === 'true',
+        slide: Number.isInteger(n) ? n : 0,
+        total: Number(total) || 0,
+        end: playing === 'true' && !Number.isInteger(n), // PowerPoint's black "end of slide show" screen
+      }
     })
 }
 
@@ -162,6 +200,18 @@ function chooseMacApp(apps) {
   return pick(apps)
 }
 
+// The shape every driver's status() returns, and what the receiver sends to Companion.
+const NO_APP = { app: '', open: false, playing: false, slide: 0, total: 0, end: false }
+const toStatus = (a) => (a ? { app: a.app, open: a.open, playing: a.playing, slide: a.slide, total: a.total, end: a.end } : NO_APP)
+
+async function macStatus(only) {
+  const apps = parseMacState(await osascript(MAC_STATE_SCRIPT))
+  const app = only || chooseMacApp(apps)
+  return toStatus(apps.find((a) => a.app === app))
+}
+macPowerPoint.status = () => macStatus('powerpoint')
+macKeynote.status = () => macStatus('keynote')
+
 const macAuto = {
   name: 'Auto (Mac: Keynote or PowerPoint)',
   async exec(cmd, args) {
@@ -169,6 +219,7 @@ const macAuto = {
     if (!app) throw new Error('Neither PowerPoint nor Keynote is open')
     return (app === 'keynote' ? macKeynote : macPowerPoint).exec(cmd, args)
   },
+  status: () => macStatus(null),
 }
 
 // ---------- Windows: PowerPoint COM automation through PowerShell ----------
@@ -212,9 +263,33 @@ $null = $app.ActivePresentation.SlideShowSettings.Run()`,
 if ($app.SlideShowWindows.Count -gt 0) { $app.SlideShowWindows.Item(1).View.Exit() }`,
 }
 
+// Prints "<deck open>,<show running>,<slide>,<total>" (slide is empty on the end-of-show screen).
+const WIN_STATUS_SCRIPT = `
+$ErrorActionPreference = 'Stop'
+try { $app = [System.Runtime.InteropServices.Marshal]::GetActiveObject('PowerPoint.Application') } catch { 'none'; exit }
+$open = $app.Presentations.Count -gt 0
+if ($app.SlideShowWindows.Count -lt 1) { "$open,False,0,0"; exit }
+$w = $app.SlideShowWindows.Item(1)
+$cur = ''
+try { if ($w.View.State -ne 5) { $cur = $w.View.Slide.SlideIndex } } catch {}
+"$open,True,$cur,$($w.Presentation.Slides.Count)"
+`
+
+function parseWinStatus(text) {
+  if (!text || text.trim() === 'none') return NO_APP
+  const [open, playing, slide, total] = text.trim().split(',')
+  const n = slide === '' ? NaN : Number(slide)
+  const isPlaying = playing === 'True'
+  return { app: 'powerpoint', open: open === 'True', playing: isPlaying, slide: Number.isInteger(n) ? n : 0, total: Number(total) || 0, end: isPlaying && !Number.isInteger(n) }
+}
+
 const winPowerPoint = {
   name: 'PowerPoint (Windows)',
   scripts: winPowerPointScripts,
+  statusEveryMs: 2000, // each check starts PowerShell, which is slow on Windows
+  async status() {
+    return parseWinStatus(await powershell(WIN_STATUS_SCRIPT))
+  },
   async exec(cmd, { slide } = {}) {
     await powershell(winPowerPointScripts[cmd](slide))
   },
@@ -233,4 +308,4 @@ function createDriver(app) {
   throw new Error(`app "${app}" is not available on ${platform} (Keynote is Mac only)`)
 }
 
-module.exports = { createDriver, cleanAppleScriptError, chooseMacApp, parseMacState, MAC_STATE_SCRIPT, macPowerPointScripts, macKeynoteScripts, winPowerPointScripts }
+module.exports = { createDriver, cleanAppleScriptError, chooseMacApp, parseMacState, parseWinStatus, MAC_STATE_SCRIPT, macPowerPointScripts, macKeynoteScripts, winPowerPointScripts }

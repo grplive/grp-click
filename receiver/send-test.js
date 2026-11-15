@@ -26,10 +26,15 @@ const socket = net.createConnection({ host, port }, () => {
 
 let out = ''
 socket.setEncoding('utf8')
+// Skips {"event":"status"} lines (slide position updates) and prints the reply to our command.
 socket.on('data', (data) => {
   out += data
-  if (out.includes('\n')) {
-    console.log(out.trim())
+  let idx
+  while ((idx = out.indexOf('\n')) !== -1) {
+    const line = out.slice(0, idx)
+    out = out.slice(idx + 1)
+    if (line.includes('"event"')) continue
+    console.log(line)
     socket.end()
   }
 })

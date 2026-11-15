@@ -7,8 +7,49 @@ const net = require('net')
 const COMMANDS = new Set(['ping', 'next', 'prev', 'first', 'last', 'start', 'stop', 'goto'])
 const MAX_LINE = 4096
 
-function createServer({ driver, version, log = () => {} }) {
+const STATUS_EVERY_MS = 1000
+
+function createServer({ driver, version, log = () => {}, statusEveryMs = driver.statusEveryMs || STATUS_EVERY_MS }) {
   const sockets = new Set()
+
+  // ---- slide position: read while anyone is connected, sent to everyone when it changes ----
+  // Sent as {"event":"status","app":"keynote","open":true,"playing":true,"slide":2,"total":6,"end":false}.
+  // Reads don't wait behind commands (they only look), and only one runs at a time.
+  let status = null // last status sent, as JSON text
+  let reading = false
+  let again = false
+  let timer = null
+
+  function sendStatus(socket, text) {
+    if (!socket.destroyed) socket.write(text + '\n')
+  }
+
+  async function readStatus() {
+    if (!driver.status || !sockets.size) return
+    if (reading) {
+      again = true // a command just finished: read once more after this one
+      return
+    }
+    reading = true
+    clearTimeout(timer)
+    try {
+      const text = JSON.stringify({ event: 'status', ...(await driver.status()) })
+      if (text !== status) {
+        status = text
+        for (const s of sockets) sendStatus(s, text)
+      }
+    } catch (err) {
+      // e.g. the app is busy or permission not given yet: keep the last position
+    } finally {
+      reading = false
+      if (again) {
+        again = false
+        readStatus()
+      } else if (sockets.size) {
+        timer = setTimeout(readStatus, statusEveryMs)
+      }
+    }
+  }
 
   // Commands run one at a time, in the order they arrive.
   let chain = Promise.resolve()
@@ -50,6 +91,7 @@ function createServer({ driver, version, log = () => {} }) {
       log(`${cmd}${slide ? ` ${slide}` : ''} failed: ${err.message}`)
       reply(socket, { ok: false, cmd, error: err.message })
     }
+    readStatus() // show the new position straight away
   }
 
   const server = net.createServer((socket) => {
@@ -58,6 +100,8 @@ function createServer({ driver, version, log = () => {} }) {
     socket.setEncoding('utf8')
     socket.setKeepAlive(true, 10000)
     let buffer = ''
+    if (status) sendStatus(socket, status)
+    if (sockets.size === 1) readStatus() // first client: start reading
 
     socket.on('data', (chunk) => {
       buffer += chunk
@@ -79,6 +123,7 @@ function createServer({ driver, version, log = () => {} }) {
   // Closes the listener AND every open connection. (server.close() alone waits for Companion's
   // connection to end, which it never does, so the process would hang on quit.)
   server.shutdown = (cb) => {
+    clearTimeout(timer)
     server.close(cb)
     for (const s of sockets) s.destroy()
   }

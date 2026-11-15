@@ -5,10 +5,10 @@ const net = require('net')
 const { createServer } = require('../server')
 
 // Starts a server with a fake driver on a free port; returns helpers to talk to it.
-async function start(exec) {
+async function start(exec, extra = {}) {
   const calls = []
-  const driver = { name: 'Fake', exec: async (cmd, args) => { calls.push([cmd, args.slide]); if (exec) await exec(cmd, args) } }
-  const server = createServer({ driver, version: '9.9.9' })
+  const driver = { name: 'Fake', ...extra, exec: async (cmd, args) => { calls.push([cmd, args.slide]); if (exec) await exec(cmd, args) } }
+  const server = createServer({ driver, version: '9.9.9', statusEveryMs: extra.statusEveryMs || 1000 })
   await new Promise((r) => server.listen(0, '127.0.0.1', r))
   const port = server.address().port
   const client = net.createConnection({ host: '127.0.0.1', port })
@@ -16,14 +16,15 @@ async function start(exec) {
   await new Promise((r) => client.on('connect', r))
   let buf = ''
   const waiting = []
+  const events = []
   client.on('data', (d) => {
     buf += d
     let i
-    while ((i = buf.indexOf('\n')) !== -1) { const line = buf.slice(0, i); buf = buf.slice(i + 1); const w = waiting.shift(); if (w) w(JSON.parse(line)) }
+    while ((i = buf.indexOf('\n')) !== -1) { const line = buf.slice(0, i); buf = buf.slice(i + 1); const msg = JSON.parse(line); if (msg.event) { events.push(msg); continue } const w = waiting.shift(); if (w) w(msg) }
   })
   const send = (raw) => new Promise((r) => { waiting.push(r); client.write(raw + '\n') })
   const close = () => new Promise((r) => { client.destroy(); server.shutdown(r) })
-  return { server, client, send, close, calls }
+  return { server, client, send, close, calls, events }
 }
 
 test('ping reports app and version', async () => {
@@ -70,4 +71,22 @@ test('shutdown closes even while a client is connected', async () => {
   const done = await Promise.race([new Promise((r) => t.server.shutdown(() => r(true))), new Promise((r) => setTimeout(() => r(false), 500))])
   assert.strictEqual(done, true)
   t.client.destroy()
+})
+
+test('sends the slide position on connect, after a command, and when it changes', async () => {
+  let slide = 1
+  const t = await start(async (cmd) => { if (cmd === 'next') slide++ }, {
+    statusEveryMs: 30,
+    status: async () => ({ app: 'keynote', open: true, playing: true, slide, total: 6, end: false }),
+  })
+  await new Promise((r) => setTimeout(r, 20))
+  assert.deepStrictEqual(t.events.map((e) => e.slide), [1])
+  await t.send('{"cmd":"next"}')
+  await new Promise((r) => setTimeout(r, 20))
+  assert.deepStrictEqual(t.events.map((e) => e.slide), [1, 2])
+  slide = 5 // presenter used their own clicker
+  await new Promise((r) => setTimeout(r, 80))
+  assert.deepStrictEqual(t.events.map((e) => `${e.slide}/${e.total}`), ['1/6', '2/6', '5/6'])
+  assert.strictEqual(t.events.at(-1).event, 'status')
+  await t.close()
 })

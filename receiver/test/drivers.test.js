@@ -65,9 +65,18 @@ test('Mac auto picks the right app', () => {
 })
 
 test('Mac app-choice script compiles', { skip: !haveApps && 'needs a Mac with PowerPoint and Keynote' }, () => {
-  const { MAC_STATE_SCRIPT } = require('../drivers')
+  const { MAC_STATE_SCRIPT } = require('../drivers') // also proves the slide-position reads compile
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'grp-click-'))
   fs.writeFileSync(path.join(dir, 's.applescript'), MAC_STATE_SCRIPT.join('\n'))
   execFileSync('osacompile', ['-o', path.join(dir, 'out.scpt'), path.join(dir, 's.applescript')], { stdio: 'pipe' })
   fs.rmSync(dir, { recursive: true, force: true })
+})
+
+test('slide position is read correctly', () => {
+  const { parseMacState, parseWinStatus } = require('../drivers')
+  assert.deepStrictEqual(parseMacState('powerpoint,true,true,false,2,6;')[0], { app: 'powerpoint', playing: true, open: true, front: false, slide: 2, total: 6, end: false })
+  assert.strictEqual(parseMacState('powerpoint,true,true,false,missing value,6;')[0].end, true) // end-of-show screen
+  assert.deepStrictEqual(parseWinStatus('True,True,3,10'), { app: 'powerpoint', open: true, playing: true, slide: 3, total: 10, end: false })
+  assert.strictEqual(parseWinStatus('True,True,,10').end, true)
+  assert.strictEqual(parseWinStatus('none').app, '')
 })

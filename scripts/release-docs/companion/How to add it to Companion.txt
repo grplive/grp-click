@@ -17,6 +17,8 @@ This goes on the machine running Bitfocus Companion (version 4 or newer).
                 RED   = can't reach that machine
                 AMBER = the last press didn't work (no slideshow,
                         no such slide...). Clears on the next good press.
+  Slide         e.g. "Keynote 2/12" - green while the show runs,
+                follows the presenter's own clicker too (display only)
   Status        Connected / Not connected (display only)
 
 The presentation machines and the Companion machine must be on the

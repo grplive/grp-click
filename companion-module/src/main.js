@@ -11,9 +11,20 @@ const MACHINE_COUNT = 10
 const WHITE = combineRgb(255, 255, 255)
 const BLACK = combineRgb(0, 0, 0)
 const AMBER = combineRgb(245, 158, 11)
+const GREEN = combineRgb(0, 162, 92)
 const RED = combineRgb(220, 38, 38)
 
 const MACHINE_CHOICES = Array.from({ length: MACHINE_COUNT }, (_, i) => ({ id: i + 1, label: `Machine ${i + 1}` }))
+const APP_NAME = { powerpoint: 'PowerPoint', keynote: 'Keynote' }
+
+// "2/12" during a show; otherwise what's going on. Empty when not connected.
+function slideText(show) {
+	if (!show) return ''
+	if (show.playing) return show.end ? 'End' : `${show.slide}/${show.total}`
+	if (show.open) return 'Not started'
+	return show.app ? 'No deck' : 'Nothing open'
+}
+
 const machineOption = { type: 'dropdown', id: 'machine', label: 'Machine', choices: MACHINE_CHOICES, default: 1 }
 
 class ClickInstance extends InstanceBase {
@@ -79,9 +90,10 @@ class ClickInstance extends InstanceBase {
 				connected: false,
 				buffer: '',
 				timer: null,
-				app: '',
+				platform: '',
 				version: '',
 				error: '',
+				show: null, // last slide position from the receiver
 			})
 			this.openSocket(n)
 		}
@@ -124,6 +136,7 @@ class ClickInstance extends InstanceBase {
 			if (this.links.get(n) !== link || link.socket !== socket) return
 			link.socket = null
 			link.connected = false
+			link.show = null
 			this.refresh()
 			link.timer = setTimeout(() => this.openSocket(n), RECONNECT_MS)
 		})
@@ -144,7 +157,9 @@ class ClickInstance extends InstanceBase {
 				continue
 			}
 			link.loggedError = false
-			if (reply.cmd === 'ping' && reply.ok) {
+			if (reply.event === 'status') {
+				link.show = reply // {app, open, playing, slide, total, end}
+			} else if (reply.cmd === 'ping' && reply.ok) {
 				link.platform =
 					reply.platform === 'win32' ? 'Windows' : reply.platform === 'darwin' ? 'Mac' : reply.platform || ''
 				link.version = reply.version || ''
@@ -192,9 +207,14 @@ class ClickInstance extends InstanceBase {
 			vars[`m${n}_platform`] = link?.connected ? link.platform : ''
 			vars[`m${n}_version`] = link?.connected ? link.version : ''
 			vars[`m${n}_error`] = link?.error || ''
+			const show = link?.connected ? link.show : null
+			vars[`m${n}_app`] = show ? APP_NAME[show.app] || '' : ''
+			vars[`m${n}_slide`] = slideText(show)
+			vars[`m${n}_slide_number`] = show?.playing && !show.end ? show.slide : ''
+			vars[`m${n}_slide_total`] = show?.playing ? show.total : ''
 		}
 		this.setVariableValues(vars)
-		this.checkFeedbacks('offline', 'failed')
+		this.checkFeedbacks('offline', 'failed', 'playing')
 	}
 
 	// ---------- definitions ----------
@@ -233,6 +253,17 @@ class ClickInstance extends InstanceBase {
 					return !!link && !link.connected
 				},
 			},
+			playing: {
+				type: 'boolean',
+				name: 'Slideshow running',
+				description: 'On while the machine is showing a slideshow',
+				defaultStyle: { bgcolor: GREEN, color: WHITE },
+				options: [machineOption],
+				callback: (fb) => {
+					const link = this.links.get(Number(fb.options.machine))
+					return !!link?.connected && !!link.show?.playing
+				},
+			},
 			failed: {
 				type: 'boolean',
 				name: 'Last command failed',
@@ -256,6 +287,10 @@ class ClickInstance extends InstanceBase {
 				{ variableId: `m${n}_platform`, name: `Machine ${n}: Mac or Windows` },
 				{ variableId: `m${n}_version`, name: `Machine ${n}: receiver version` },
 				{ variableId: `m${n}_error`, name: `Machine ${n}: last error` },
+				{ variableId: `m${n}_slide`, name: `Machine ${n}: slide, e.g. 2/12 (or End, Not started, No deck)` },
+				{ variableId: `m${n}_slide_number`, name: `Machine ${n}: slide number` },
+				{ variableId: `m${n}_slide_total`, name: `Machine ${n}: number of slides` },
+				{ variableId: `m${n}_app`, name: `Machine ${n}: PowerPoint or Keynote` },
 			)
 		}
 		return defs
@@ -270,13 +305,17 @@ class ClickInstance extends InstanceBase {
 			options: { machine },
 			style: { ...defs[feedbackId].defaultStyle },
 		})
-		const btn = (category, name, text, actionId, options, size = '18') => ({
+		const btn = (category, name, text, actionId, options, size = '18', extra = []) => ({
 			type: 'button',
 			category,
 			name,
 			style: { text, size, color: WHITE, bgcolor: BLACK },
 			steps: [{ down: actionId ? [{ actionId, options }] : [], up: [] }],
-			feedbacks: [fb('failed', options.machine), fb('offline', options.machine)],
+			feedbacks: [
+				...extra.map((id) => fb(id, options.machine)),
+				fb('failed', options.machine),
+				fb('offline', options.machine),
+			],
 		})
 		const p = {}
 		for (const n of [1, 2]) {
@@ -295,6 +334,15 @@ class ClickInstance extends InstanceBase {
 				'goto',
 				{ ...m, slide: 1 },
 				'14',
+			)
+			p[`m${n}_slide`] = btn(
+				c,
+				'Slide, e.g. 2/12 (display only, green while the show runs)',
+				`$(${this.label}:m${n}_app)\\n$(${this.label}:m${n}_slide)`,
+				null,
+				m,
+				'auto',
+				['playing'],
 			)
 			p[`m${n}_status`] = btn(c, 'Status (display only)', `M${n}\\n$(${this.label}:m${n}_status)`, null, m, 'auto')
 		}

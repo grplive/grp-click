@@ -4,6 +4,7 @@ Change slides in **PowerPoint** (Mac and Windows) and **Keynote** (Mac) from Bit
 
 - Next, back, first, last, go to slide, start and end the show
 - Up to 10 presentation machines from one Companion connection
+- Shows where each show is (e.g. 2/12) on a button, even when the presenter uses their own clicker
 - Buttons turn red when a machine can't be reached and amber when a press didn't work
 - Never opens PowerPoint or Keynote and never sends key presses: it only talks to the show that's open
 
@@ -78,6 +79,14 @@ The receiver listens on TCP port **8765**. Send one JSON object per line; each g
 ```
 
 Commands: `ping`, `next`, `prev`, `first`, `last`, `goto` (with `slide`), `start`, `stop`.
+
+While connected, the receiver also sends the slide position whenever it changes (checked every second, and straight after each command; every 2 seconds on Windows):
+
+```
+{"event":"status","app":"keynote","open":true,"playing":true,"slide":2,"total":12,"end":false}
+```
+
+Numbering follows each app, as in GRP Notes: PowerPoint counts every slide (hidden ones too), Keynote uses its own numbers (skipped slides have none). `end` is true on PowerPoint's black end-of-show screen.
 
 Settings are in `config.json` next to the log (`~/Library/Application Support/GRP Click/` on Mac, `%APPDATA%\GRP Click\` on Windows): `port`, `bind`, and `app` (`auto`, `powerpoint` or `keynote`). Restart the receiver (log out and in) after changing them.
 
