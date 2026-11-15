@@ -6,7 +6,6 @@
   const CMD_NAMES = { next: 'Next', prev: 'Back', first: 'First', last: 'Last', start: 'Start show', stop: 'End show', goto: 'Go to' }
   let snap = null
 
-  for (const b of document.querySelectorAll('[data-test]')) b.addEventListener('click', () => api.test(b.dataset.test))
   $('#login').addEventListener('change', (e) => api.setOpenAtLogin(e.target.checked))
   $('#btn-update').addEventListener('click', () => api.openDownload())
   $('#btn-perm').addEventListener('click', () => api.openPermissions())
@@ -68,7 +67,7 @@
               `<span class="from">${esc(r.from)}</span></div>`
           )
           .join('')
-      : '<div class="hint">Nothing yet. Press a button in Companion, or try it above.</div>'
+      : '<div class="hint">Nothing yet. Press a button in Companion.</div>'
 
     $('#update').classList.toggle('hidden', !snap.update)
     if (snap.update) $('#update-text').textContent = `GRP Click ${snap.update.latest} is available (you have ${snap.version})`

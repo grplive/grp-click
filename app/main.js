@@ -128,7 +128,7 @@ function showWindow() {
   }
   win = new BrowserWindow({
     width: 460,
-    height: 800,
+    height: 720,
     minHeight: 520,
     resizable: true,
     maximizable: false,
@@ -157,9 +157,6 @@ function showWindow() {
 const fromWindow = (e) => win && !win.isDestroyed() && e.sender === win.webContents
 
 ipcMain.handle('get-snapshot', (e) => (fromWindow(e) ? snapshot() : null))
-ipcMain.on('test', (e, cmd) => {
-  if (fromWindow(e) && server && ['prev', 'next', 'start', 'stop'].includes(cmd)) server.runLocal(cmd)
-})
 ipcMain.on('set-open-at-login', (e, on) => {
   if (!fromWindow(e)) return
   settings.openAtLogin = !!on

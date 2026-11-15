@@ -27,8 +27,6 @@
     .ip { display: flex; align-items: baseline; gap: 10px; }
     .ip .addr { font: 600 20px var(--mono); user-select: text; }
     .ip .net { color: var(--dim); font-size: 13px; }
-    .tests { display: flex; gap: 8px; }
-    .tests .btn { flex: 1; }
     .log { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
     .log .row { display: flex; gap: 8px; align-items: baseline; }
     .log .t { color: var(--muted); font-family: var(--mono); font-size: 12px; flex: none; }
@@ -53,13 +51,6 @@
   <div class="panel">
     <h3>Presentation</h3>
     <div class="show"><span class="slide" id="slide">–</span><span id="app" class="hint"></span></div>
-    <div class="tests" style="margin-top:12px">
-      <button class="btn" data-test="start">Start show</button>
-      <button class="btn" data-test="prev">◀ Back</button>
-      <button class="btn" data-test="next">Next ▶</button>
-      <button class="btn" data-test="stop">End show</button>
-    </div>
-    <p class="hint">Try it here before the show. On a Mac the first press asks to control PowerPoint or Keynote: click OK.</p>
   </div>
 
   <div class="panel">

@@ -32,7 +32,7 @@ Older versions and release notes: [Releases](https://github.com/grplive/grp-clic
 GRP Click opens a window that shows:
 
 - **Companion connected** (green) or **Waiting for Companion**
-- the app and slide on the presentation machine, e.g. *Keynote · 2 / 12*, with Start / Back / Next / End buttons to try it before the show
+- the app and slide on the presentation machine, e.g. *Keynote · 2 / 12*
 - this computer's IP addresses, to type into Companion
 - the last few commands, with ✓ or the reason one didn't work
 
@@ -42,7 +42,7 @@ Close the window and it keeps running in the menu bar (Mac) or system tray (Wind
 
 The app isn't signed with Apple or Microsoft yet, so the first launch needs one extra step:
 
-- **Mac:** open the .dmg and drag GRP Click to Applications, then open it. When macOS says it can't verify the app, click **Done**. Go to **System Settings → Privacy & Security**, scroll down and click **Open Anyway**. You only do this once. The first time it controls PowerPoint or Keynote, macOS asks whether GRP Click may: click **OK** (press Next in the window before the show to get this out of the way).
+- **Mac:** open the .dmg and drag GRP Click to Applications, then open it. When macOS says it can't verify the app, click **Done**. Go to **System Settings → Privacy & Security**, scroll down and click **Open Anyway**. You only do this once. The first time it controls PowerPoint or Keynote, macOS asks whether GRP Click may: click **OK**. Open the deck with GRP Click running before the show, so this is out of the way.
 - **Windows:** if "Windows protected your PC" appears, click **More info → Run anyway**, and allow network access when Windows Firewall asks.
 
 Updating: install the new version over the top. The app tells you when a new version is out.

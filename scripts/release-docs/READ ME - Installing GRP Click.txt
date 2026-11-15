@@ -27,7 +27,7 @@ MAC
 3. Open System Settings > Privacy & Security, scroll down, and click
    "Open Anyway" next to GRP Click. Enter the Mac's password.
    You only do this once per machine.
-4. Open the deck and press Next in the GRP Click window. macOS asks
+4. With GRP Click open, open the deck. macOS asks
    "GRP Click wants to control Keynote / PowerPoint" - click OK.
    Do this before the show.
 5. Eject the "GRP Click" disk on the desktop.
@@ -55,8 +55,7 @@ THE WINDOW
                                    GRP Click connection in Companion
   Red    "Not listening"         - read the message (usually another
                                    copy is already running)
-  Presentation   the app and slide, e.g. Keynote 2 / 12, with buttons
-                 to try it
+  Presentation   the app and slide, e.g. Keynote 2 / 12
   Last commands  every press, with a tick or the reason it failed
 
 Close the window and GRP Click keeps running in the menu bar (Mac) /
