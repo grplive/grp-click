@@ -53,7 +53,9 @@ The Windows version (PowerPoint for Windows) hasn't been tried on a Windows mach
 
 ## Bitfocus Companion
 
-1. Companion → Modules → **Import module package** → the .tgz (until it's in Companion's own module list).
+The module comes with GRP Click rather than through Companion's built-in module list.
+
+1. Companion → Modules → **Import module package** → [GRP-Click-Companion-Module.tgz](https://github.com/grplive/grp-click/releases/latest/download/GRP-Click-Companion-Module.tgz). Import a newer .tgz the same way to update.
 2. Add a **GRP Live: Click** connection.
 3. Enter each presentation machine's IP address (Machine 1–10). Leave the port at 8765.
 4. Drag the presets onto your buttons. They target Machine 1 or 2; change the **Machine** option for others.

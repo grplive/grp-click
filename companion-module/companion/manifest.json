@@ -6,8 +6,8 @@
 	"description": "Next, previous, go to slide, start and end the show in PowerPoint (Mac/Windows) and Keynote, through the GRP Click Receiver",
 	"version": "0.0.0",
 	"license": "MIT",
-	"repository": "git+https://github.com/bitfocus/companion-module-grplive-click.git",
-	"bugs": "https://github.com/bitfocus/companion-module-grplive-click/issues",
+	"repository": "git+https://github.com/grplive/grp-click.git",
+	"bugs": "https://github.com/grplive/grp-click/issues",
 	"maintainers": [
 		{
 			"name": "GRP Live",
