@@ -1,0 +1,25 @@
+{
+	"name": "grp-click",
+	"version": "1.0.2",
+	"description": "GRP Click: Bitfocus Companion connection for the GRP Click Receiver",
+	"type": "module",
+	"main": "src/main.js",
+	"scripts": {
+		"format": "prettier -w .",
+		"package": "companion-module-build"
+	},
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://grp.live"
+	},
+	"engines": {
+		"node": ">=22"
+	},
+	"dependencies": {
+		"@companion-module/base": "^2.2.1"
+	},
+	"devDependencies": {
+		"@companion-module/tools": "^3.1.1"
+	}
+}

@@ -1,0 +1,21 @@
+{
+  "name": "grp-click-receiver",
+  "version": "1.0.0",
+  "description": "GRP Click Receiver: receives slide commands over the network and controls PowerPoint (Mac/Windows) or Keynote (Mac)",
+  "main": "receiver.js",
+  "private": true,
+  "license": "MIT",
+  "bin": {
+    "grp-click-receiver": "receiver.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node receiver.js",
+    "build": "node build/build.js"
+  },
+  "devDependencies": {
+    "@yao-pkg/pkg": "^6.23.0"
+  }
+}
