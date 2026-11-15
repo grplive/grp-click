@@ -4,3 +4,4 @@ pkg/
 *.tgz
 release/
 .DS_Store
+app/assets/fonts/

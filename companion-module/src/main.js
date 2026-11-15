@@ -1,5 +1,5 @@
 // Bitfocus Companion module for GRP Click.
-// Keeps one TCP connection open to the GRP Click Receiver on each presentation machine (port 8765)
+// Keeps one TCP connection open to the GRP Click app on each presentation machine (port 8765)
 // and sends it newline-delimited JSON commands. Each reply says whether the command worked.
 const { InstanceBase, InstanceStatus, runEntrypoint, combineRgb } = require('@companion-module/base')
 const net = require('node:net')
@@ -20,7 +20,7 @@ const APP_NAME = { powerpoint: 'PowerPoint', keynote: 'Keynote' }
 // "2/12" during a show; otherwise what's going on. Empty when not connected.
 function slideText(show) {
 	if (!show) return ''
-	if (show.playing) return show.end ? 'End' : `${show.slide}/${show.total}`
+	if (show.playing) return show.end ? 'End' : show.slide ? `${show.slide}/${show.total}` : '…'
 	if (show.open) return 'Not started'
 	return show.app ? 'No deck' : 'Nothing open'
 }
@@ -55,12 +55,12 @@ class ClickInstance extends InstanceBase {
 				width: 12,
 				label: '',
 				value:
-					"Install the GRP Click Receiver on each presentation machine, then enter each machine's IP address. Leave unused machines blank.",
+					'Install and open GRP Click on each presentation machine. Its window shows the IP address to enter here. Leave unused machines blank.',
 			},
 			{
 				type: 'number',
 				id: 'port',
-				label: 'Port (same on every receiver)',
+				label: 'Port (8765 unless changed)',
 				width: 4,
 				min: 1,
 				max: 65535,
@@ -93,7 +93,7 @@ class ClickInstance extends InstanceBase {
 				platform: '',
 				version: '',
 				error: '',
-				show: null, // last slide position from the receiver
+				show: null, // last slide position from GRP Click
 			})
 			this.openSocket(n)
 		}
@@ -123,7 +123,7 @@ class ClickInstance extends InstanceBase {
 
 		socket.on('connect', () => {
 			link.connected = true
-			socket.write(JSON.stringify({ cmd: 'ping' }) + '\n') // learn the app and receiver version
+			socket.write(JSON.stringify({ cmd: 'ping' }) + '\n') // learn the platform and GRP Click version
 			this.refresh()
 		})
 		socket.on('data', (data) => this.handleReplies(n, data))
@@ -210,7 +210,7 @@ class ClickInstance extends InstanceBase {
 			const show = link?.connected ? link.show : null
 			vars[`m${n}_app`] = show ? APP_NAME[show.app] || '' : ''
 			vars[`m${n}_slide`] = slideText(show)
-			vars[`m${n}_slide_number`] = show?.playing && !show.end ? show.slide : ''
+			vars[`m${n}_slide_number`] = show?.playing && !show.end && show.slide ? show.slide : ''
 			vars[`m${n}_slide_total`] = show?.playing ? show.total : ''
 		}
 		this.setVariableValues(vars)
@@ -245,7 +245,7 @@ class ClickInstance extends InstanceBase {
 			offline: {
 				type: 'boolean',
 				name: 'Machine not connected',
-				description: 'On when the machine has an IP but its receiver cannot be reached',
+				description: 'On when the machine has an IP but GRP Click there cannot be reached',
 				defaultStyle: { bgcolor: RED, color: WHITE },
 				options: [machineOption],
 				callback: (fb) => {
@@ -285,7 +285,7 @@ class ClickInstance extends InstanceBase {
 			defs.push(
 				{ variableId: `m${n}_status`, name: `Machine ${n}: status` },
 				{ variableId: `m${n}_platform`, name: `Machine ${n}: Mac or Windows` },
-				{ variableId: `m${n}_version`, name: `Machine ${n}: receiver version` },
+				{ variableId: `m${n}_version`, name: `Machine ${n}: GRP Click version` },
 				{ variableId: `m${n}_error`, name: `Machine ${n}: last error` },
 				{ variableId: `m${n}_slide`, name: `Machine ${n}: slide, e.g. 2/12 (or End, Not started, No deck)` },
 				{ variableId: `m${n}_slide_number`, name: `Machine ${n}: slide number` },

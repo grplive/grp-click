@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:">
+  <title>GRP Click</title>
+  <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="control.css">
+  <style>
+    body { display: flex; flex-direction: column; padding: 18px; gap: 14px; overflow-y: auto; }
+    body > * { flex: none; }
+    .panel + .panel { margin-top: 0; }
+    .head { display: flex; align-items: center; gap: 12px; }
+    .head .logo { height: 28px; }
+    .big { display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); }
+    .big .dot { width: 16px; height: 16px; border-radius: 50%; background: var(--warn); flex: none; }
+    .big.ok { border-color: rgba(19,192,113,.45); }
+    .big.ok .dot { background: var(--accent-hi); box-shadow: 0 0 10px var(--accent-hi); }
+    .big.bad { border-color: rgba(240,82,82,.5); }
+    .big.bad .dot { background: var(--danger); }
+    .big .line1 { font: 600 17px var(--font); }
+    .big .line2 { color: var(--dim); font-size: 13px; margin-top: 2px; }
+    .show { display: flex; align-items: baseline; gap: 12px; }
+    .show .slide { font: 600 40px var(--display); letter-spacing: .01em; }
+    .show .slide.off { color: var(--muted); font-size: 20px; }
+    .ips { display: flex; flex-direction: column; gap: 6px; }
+    .ip { display: flex; align-items: baseline; gap: 10px; }
+    .ip .addr { font: 600 20px var(--mono); user-select: text; }
+    .ip .net { color: var(--dim); font-size: 13px; }
+    .tests { display: flex; gap: 8px; }
+    .tests .btn { flex: 1; }
+    .log { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+    .log .row { display: flex; gap: 8px; align-items: baseline; }
+    .log .t { color: var(--muted); font-family: var(--mono); font-size: 12px; flex: none; }
+    .log .ok { color: var(--accent-hi); }
+    .log .no { color: var(--warn); }
+    .log .from { color: var(--muted); margin-left: auto; flex: none; }
+    .update, .perm { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; font-weight: 600; font-size: 13px; }
+    .update { border: 1px solid var(--accent); background: rgba(0,162,92,.08); color: var(--accent-hi); }
+    .perm { border: 1px solid var(--warn); background: rgba(251,191,36,.08); color: var(--warn); }
+    .row2 { display: flex; align-items: center; gap: 10px; }
+  </style>
+</head>
+<body>
+  <div class="head"><img class="logo" src="../assets/logo-dark.png" alt="GRP Live"><div class="app-title">Click</div><div class="spacer"></div><span class="chip">SLIDE CONTROL</span></div>
+
+  <div class="update hidden" id="update"><span id="update-text"></span><span class="spacer"></span><button class="btn btn-sm btn-accent" id="btn-update">Download</button></div>
+
+  <div class="big" id="big"><span class="dot"></span><div><div class="line1" id="line1">Starting…</div><div class="line2" id="line2"></div></div></div>
+
+  <div class="perm hidden" id="perm"><span id="perm-text">macOS hasn't let GRP Click control PowerPoint / Keynote.</span><span class="spacer"></span><button class="btn btn-sm" id="btn-perm">Open settings</button></div>
+
+  <div class="panel">
+    <h3>Presentation</h3>
+    <div class="show"><span class="slide" id="slide">–</span><span id="app" class="hint"></span></div>
+    <div class="tests" style="margin-top:12px">
+      <button class="btn" data-test="start">Start show</button>
+      <button class="btn" data-test="prev">◀ Back</button>
+      <button class="btn" data-test="next">Next ▶</button>
+      <button class="btn" data-test="stop">End show</button>
+    </div>
+    <p class="hint">Try it here before the show. On a Mac the first press asks to control PowerPoint or Keynote: click OK.</p>
+  </div>
+
+  <div class="panel">
+    <h3>Put this in Companion</h3>
+    <div class="ips" id="ips"></div>
+    <p class="hint" id="port-hint"></p>
+  </div>
+
+  <div class="panel">
+    <h3>Last commands</h3>
+    <div class="log" id="log"></div>
+  </div>
+
+  <div class="panel">
+    <label class="check"><input type="checkbox" id="login"> Open GRP Click when this computer starts</label>
+  </div>
+
+  <div class="row2">
+    <span class="hint" id="foot" style="margin:0"></span>
+    <div class="spacer"></div>
+    <button class="btn btn-danger-ghost" id="btn-quit">Quit GRP Click</button>
+  </div>
+  <script src="window.js"></script>
+</body>
+</html>

@@ -24,7 +24,7 @@ function run(file, args, timeout = 5000) {
 // Turns osascript's "123:456: execution error: Keynote isn't open (9001)" into "Keynote isn't open".
 function cleanAppleScriptError(text) {
   if (/\(-1743\)/.test(text) || /Not authori[sz]ed to send Apple events/i.test(text)) {
-    return 'macOS has not allowed GRP Click to control this app. System Settings > Privacy & Security > Automation: turn on PowerPoint/Keynote under grp-click-receiver.'
+    return "NEEDS_PERMISSION: macOS hasn't let GRP Click control this app yet. System Settings > Privacy & Security > Automation > GRP Click: turn on PowerPoint and Keynote."
   }
   const m = text.match(/execution error: (?:[^:]+ got an error: )?([\s\S]*?) \(-?\d+\)\s*$/)
   return (m ? m[1] : text).trim()

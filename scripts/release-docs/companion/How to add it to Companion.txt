@@ -8,6 +8,7 @@ This goes on the machine running Bitfocus Companion (version 4 or newer).
    and choose the .tgz file.
 3. Connections > add "GRP Live: Click".
 4. Type in each presentation machine's IP address (Machine 1, 2...).
+   It's shown in the GRP Click window on each machine.
    Leave the port at 8765.
 5. Presets: drag the Machine 1 / Machine 2 buttons onto your
    Stream Deck pages. For Machine 3 and up, drag a Machine 1 button

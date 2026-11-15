@@ -2,7 +2,7 @@
 const test = require('node:test')
 const assert = require('node:assert')
 const net = require('net')
-const { createServer } = require('../server')
+const { createServer } = require('../src/server')
 
 // Starts a server with a fake driver on a free port; returns helpers to talk to it.
 async function start(exec, extra = {}) {
@@ -88,5 +88,17 @@ test('sends the slide position on connect, after a command, and when it changes'
   await new Promise((r) => setTimeout(r, 80))
   assert.deepStrictEqual(t.events.map((e) => `${e.slide}/${e.total}`), ['1/6', '2/6', '5/6'])
   assert.strictEqual(t.events.at(-1).event, 'status')
+  await t.close()
+})
+
+test('remembers recent commands and who is connected, for the window', async () => {
+  const t = await start(async (cmd) => { if (cmd === 'prev') throw new Error('No Keynote slideshow is running') })
+  await t.send('{"cmd":"next"}')
+  await t.send('{"cmd":"prev"}')
+  await t.server.runLocal('first')
+  const info = t.server.info()
+  assert.deepStrictEqual(info.clients, ['127.0.0.1'])
+  assert.deepStrictEqual(info.recent.map((r) => [r.cmd, r.ok, r.from]), [['first', true, 'this computer'], ['prev', false, '127.0.0.1'], ['next', true, '127.0.0.1']])
+  assert.strictEqual(info.recent[1].error, 'No Keynote slideshow is running')
   await t.close()
 })

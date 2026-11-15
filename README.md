@@ -6,19 +6,20 @@ Change slides in **PowerPoint** (Mac and Windows) and **Keynote** (Mac) from Bit
 - Up to 10 presentation machines from one Companion connection
 - Shows where each show is (e.g. 2/12) on a button, even when the presenter uses their own clicker
 - Buttons turn red when a machine can't be reached and amber when a press didn't work
+- A window on each presentation machine shows it's connected and working
 - Never opens PowerPoint or Keynote and never sends key presses: it only talks to the show that's open
 
 Goes with [GRP Stage Timer](https://github.com/grplive/grp-stage-timer) and [GRP Notes](https://github.com/grplive/grp-notes).
 
 ## Download
 
-**Receiver**, for each presentation machine:
+**GRP Click**, for each presentation machine:
 
 | | |
 |---|---|
-| **Mac – Apple Silicon** (M1 and later) | [GRP-Click-Receiver-Mac-Apple-Silicon.pkg](https://github.com/grplive/grp-click/releases/latest/download/GRP-Click-Receiver-Mac-Apple-Silicon.pkg) |
-| **Mac – Intel** | [GRP-Click-Receiver-Mac-Intel.pkg](https://github.com/grplive/grp-click/releases/latest/download/GRP-Click-Receiver-Mac-Intel.pkg) |
-| **Windows** (64-bit) · *not tested yet, see below* | [GRP-Click-Receiver-Windows.zip](https://github.com/grplive/grp-click/releases/latest/download/GRP-Click-Receiver-Windows.zip) |
+| **Mac – Apple Silicon** (M1 and later) | [GRP-Click-Mac-Apple-Silicon.dmg](https://github.com/grplive/grp-click/releases/latest/download/GRP-Click-Mac-Apple-Silicon.dmg) |
+| **Mac – Intel** | [GRP-Click-Mac-Intel.dmg](https://github.com/grplive/grp-click/releases/latest/download/GRP-Click-Mac-Intel.dmg) |
+| **Windows** (64-bit) · *not tested yet, see below* | [GRP-Click-Windows-Setup.exe](https://github.com/grplive/grp-click/releases/latest/download/GRP-Click-Windows-Setup.exe) |
 
 **Companion module**, for the Companion machine: [GRP-Click-Companion-Module.tgz](https://github.com/grplive/grp-click/releases/latest/download/GRP-Click-Companion-Module.tgz)
 
@@ -26,20 +27,29 @@ Not sure which Mac? Apple menu → About This Mac: "Chip: Apple M…" is Apple S
 
 Older versions and release notes: [Releases](https://github.com/grplive/grp-click/releases).
 
-### Installing the receiver
+### The app
 
-The receiver has no window. It starts by itself when you log in. Install it while logged in as the person who runs PowerPoint or Keynote.
+GRP Click opens a window that shows:
 
-The installers aren't signed with Apple or Microsoft yet, so the first install needs one extra step:
+- **Companion connected** (green) or **Waiting for Companion**
+- the app and slide on the presentation machine, e.g. *Keynote · 2 / 12*, with Start / Back / Next / End buttons to try it before the show
+- this computer's IP addresses, to type into Companion
+- the last few commands, with ✓ or the reason one didn't work
 
-- **Mac:** double-click the .pkg. When macOS says it can't check it, click **Done**. Go to **System Settings → Privacy & Security**, scroll down and click **Open Anyway**, then follow the installer. The first time Companion sends a command, macOS asks whether *grp-click-receiver* may control PowerPoint or Keynote: click **OK**. Do one test press before the show. After an update macOS may ask again.
-- **Windows:** unzip, then double-click **install.bat** and approve the administrator prompt. If "Windows protected your PC" appears, click **More info → Run anyway**. The window shows the machine's IP address at the end.
+Close the window and it keeps running in the menu bar (Mac) or system tray (Windows), showing the slide there too. It opens when the computer starts (untick that in the window if you don't want it).
 
-Updating: install the new version over the top.
+### First time you open it
+
+The app isn't signed with Apple or Microsoft yet, so the first launch needs one extra step:
+
+- **Mac:** open the .dmg and drag GRP Click to Applications, then open it. When macOS says it can't verify the app, click **Done**. Go to **System Settings → Privacy & Security**, scroll down and click **Open Anyway**. You only do this once. The first time it controls PowerPoint or Keynote, macOS asks whether GRP Click may: click **OK** (press Next in the window before the show to get this out of the way).
+- **Windows:** if "Windows protected your PC" appears, click **More info → Run anyway**, and allow network access when Windows Firewall asks.
+
+Updating: install the new version over the top. The app tells you when a new version is out.
 
 ### Windows: not tested yet
 
-The Windows receiver (PowerPoint for Windows) hasn't been tried on a Windows machine yet. Use a Mac for shows until it has; problems are welcome via grp.live.
+The Windows version (PowerPoint for Windows) hasn't been tried on a Windows machine yet. Use a Mac for shows until it has; problems are welcome via grp.live.
 
 ## Bitfocus Companion
 
@@ -48,7 +58,7 @@ The Windows receiver (PowerPoint for Windows) hasn't been tried on a Windows mac
 3. Enter each presentation machine's IP address (Machine 1–10). Leave the port at 8765.
 4. Drag the presets onto your buttons. They target Machine 1 or 2; change the **Machine** option for others.
 
-Mac IP address: System Settings → Network → your connection → Details. Windows: shown at the end of install.bat, or run `ipconfig`.
+The IP addresses are shown in the GRP Click window on each machine.
 
 ## What works where
 
@@ -66,11 +76,11 @@ Mac IP address: System Settings → Network → your connection → Details. Win
 
 ## Security
 
-No password and no encryption: anyone on the same network who can reach port 8765 can change the slides. Use it on a private show network, never on guest or venue Wi-Fi. The Windows installer opens port 8765 for the receiver only.
+No password and no encryption: anyone on the same network who can reach port 8765 can change the slides. Use it on a private show network, never on guest or venue Wi-Fi. The window's *Last commands* shows where every command came from.
 
 ## Network API
 
-The receiver listens on TCP port **8765**. Send one JSON object per line; each gets a one-line reply.
+GRP Click listens on TCP port **8765**. Send one JSON object per line; each gets a one-line reply.
 
 ```
 {"cmd":"next"}            {"ok":true,"cmd":"next"}
@@ -80,7 +90,7 @@ The receiver listens on TCP port **8765**. Send one JSON object per line; each g
 
 Commands: `ping`, `next`, `prev`, `first`, `last`, `goto` (with `slide`), `start`, `stop`.
 
-While connected, the receiver also sends the slide position whenever it changes (checked every second, and straight after each command; every 2 seconds on Windows):
+While connected, GRP Click also sends the slide position whenever it changes (checked every second, and straight after each command; every 2 seconds on Windows):
 
 ```
 {"event":"status","app":"keynote","open":true,"playing":true,"slide":2,"total":12,"end":false}
@@ -88,11 +98,9 @@ While connected, the receiver also sends the slide position whenever it changes 
 
 Numbering follows each app, as in GRP Notes: PowerPoint counts every slide (hidden ones too), Keynote uses its own numbers (skipped slides have none). `end` is true on PowerPoint's black end-of-show screen.
 
-Settings are in `config.json` next to the log (`~/Library/Application Support/GRP Click/` on Mac, `%APPDATA%\GRP Click\` on Windows): `port`, `bind`, and `app` (`auto`, `powerpoint` or `keynote`). Restart the receiver (log out and in) after changing them.
-
 ## Source
 
-- `receiver/`: `receiver.js` (start-up, config, log), `server.js` (network), `drivers.js` (PowerPoint and Keynote), `send-test.js` (send one command by hand), `build/` (installers). `npm test` runs the tests; on a Mac with PowerPoint and Keynote it also checks every AppleScript compiles.
+- `app/`: the Electron app. `main.js` (window, menu bar / tray), `src/server.js` (network), `src/drivers.js` (PowerPoint and Keynote), `src/window.html` / `window.js` (the window), `send-test.js` (send one command by hand). `npm test` runs the tests; on a Mac with PowerPoint and Keynote it also checks every AppleScript compiles. `npm start` runs it from source.
 - `companion-module/`: the Companion module (`src/main.js`), built with `npm run package`.
 - `scripts/release.sh --build` tests and builds everything into `release/GRP Click/` for the NAS. `scripts/publish-github.sh` publishes the GitHub release (commit and push first, and write `scripts/release-notes/<version>.md`).
 

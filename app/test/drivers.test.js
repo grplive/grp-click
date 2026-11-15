@@ -5,8 +5,8 @@ const fs = require('fs')
 const os = require('os')
 const path = require('path')
 const { execFileSync } = require('child_process')
-const { cleanAppleScriptError, macPowerPointScripts, macKeynoteScripts, winPowerPointScripts } = require('../drivers')
-const { COMMANDS } = require('../server')
+const { cleanAppleScriptError, macPowerPointScripts, macKeynoteScripts, winPowerPointScripts } = require('../src/drivers')
+const { COMMANDS } = require('../src/server')
 
 const ACTIONS = [...COMMANDS].filter((c) => c !== 'ping')
 
@@ -47,11 +47,11 @@ test('every Mac AppleScript compiles', { skip: !haveApps && 'needs a Mac with Po
 test('AppleScript errors are made readable', () => {
   assert.strictEqual(cleanAppleScriptError("0:85: execution error: Keynote isn't open (9001)"), "Keynote isn't open")
   assert.strictEqual(cleanAppleScriptError('10:20: execution error: Keynote got an error: There is no slide 9 (9003)'), 'There is no slide 9')
-  assert.match(cleanAppleScriptError('execution error: Not authorised to send Apple events to Keynote. (-1743)'), /Privacy & Security > Automation/)
+  assert.match(cleanAppleScriptError('execution error: Not authorised to send Apple events to Keynote. (-1743)'), /NEEDS_PERMISSION/)
 })
 
 test('Mac auto picks the right app', () => {
-  const { chooseMacApp, parseMacState } = require('../drivers')
+  const { chooseMacApp, parseMacState } = require('../src/drivers')
   const st = (s) => chooseMacApp(parseMacState(s))
   assert.strictEqual(st(''), null)
   // The 2026-11-15 case: PowerPoint running with nothing open, Keynote in front with a deck.
@@ -65,7 +65,7 @@ test('Mac auto picks the right app', () => {
 })
 
 test('Mac app-choice script compiles', { skip: !haveApps && 'needs a Mac with PowerPoint and Keynote' }, () => {
-  const { MAC_STATE_SCRIPT } = require('../drivers') // also proves the slide-position reads compile
+  const { MAC_STATE_SCRIPT } = require('../src/drivers') // also proves the slide-position reads compile
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'grp-click-'))
   fs.writeFileSync(path.join(dir, 's.applescript'), MAC_STATE_SCRIPT.join('\n'))
   execFileSync('osacompile', ['-o', path.join(dir, 'out.scpt'), path.join(dir, 's.applescript')], { stdio: 'pipe' })
@@ -73,7 +73,7 @@ test('Mac app-choice script compiles', { skip: !haveApps && 'needs a Mac with Po
 })
 
 test('slide position is read correctly', () => {
-  const { parseMacState, parseWinStatus } = require('../drivers')
+  const { parseMacState, parseWinStatus } = require('../src/drivers')
   assert.deepStrictEqual(parseMacState('powerpoint,true,true,false,2,6;')[0], { app: 'powerpoint', playing: true, open: true, front: false, slide: 2, total: 6, end: false })
   assert.strictEqual(parseMacState('powerpoint,true,true,false,missing value,6;')[0].end, true) // end-of-show screen
   assert.deepStrictEqual(parseWinStatus('True,True,3,10'), { app: 'powerpoint', open: true, playing: true, slide: 3, total: 10, end: false })
